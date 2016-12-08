@@ -5,6 +5,7 @@
 function SearchingKeyWords($command)
 	{
 	GLOBAL $AlexaArray;
+	GLOBAL $debug;
 	
 	$result = false;
 	$count = 1;
@@ -15,7 +16,11 @@ function SearchingKeyWords($command)
 		if ( $c[0] == "" )
 			continue;
 				
-		$eval = "\$result = " .  $c[0] ;	
+		$eval = "\$result = (" .  $c[0] .");";	
+		
+		if ( $debug ) IPS_LogMessage(basename(__FILE__),"eval: [".$eval."]");
+
+		
 		eval ($eval);		
 		
 		if ( $result == true )
@@ -29,6 +34,11 @@ function SearchingKeyWords($command)
 		$count = $count + 1;
 		
 		}
+
+	
+	if ( $result == true )
+    if ( $debug ) IPS_LogMessage(basename(__FILE__),"SessionID gefunden: ".$count);
+	
 
 	if ( $result == true )
 		return $count;
@@ -44,8 +54,19 @@ function SearchingKeyWords($command)
 function search($word)
 	{
 	GLOBAL $spokenWords;
+	GLOBAL $debug;
 	
-	return in_array($word, $spokenWords);
+	$result = in_array($word, $spokenWords);
+	
+    if ( $debug ) 
+		if ( $result == true )
+			IPS_LogMessage(basename(__FILE__),"Search OK : ".$word);
+		else
+			IPS_LogMessage(basename(__FILE__),"Search NOK: ".$word);
+
+	
+	return $result;
+	 
 	}
 	
 
