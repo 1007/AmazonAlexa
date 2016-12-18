@@ -6,7 +6,7 @@
 	GLOBAL $debug;
 	GLOBAL $logging;
 	GLOBAL $parentDataID;
-	GLOBAL $AlexaArray;
+	GLOBAL $AlexaGeraetArray;
 
 //******************************************************************************
 //	AmazonEcho relevante Definitionen
@@ -29,7 +29,7 @@
 // Suche nach Schluesselwoerter um dann das angegeben Script zu starten
 //******************************************************************************
 
-	$AlexaArray = array( 
+	$AlexaMasterKeyArray = array( 
 				
 	array("search('licht') AND ( search('schalte') OR search('dimme') ) "			,"AmazonEcho_Licht.ips.php"		),
 	array("search('temperatur') AND search('hoch') "													,"AmazonEcho_Temperatur.ips.php"),
