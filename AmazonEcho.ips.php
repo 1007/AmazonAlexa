@@ -22,6 +22,11 @@
 
 	$command            = strtolower($command); 
 	
+	if ( $command == "" )
+		{
+		//fail('Fehler : command leer');
+		}
+		
 	//Alexas Anfrage ist ein HTTP POST
 	if ( $_SERVER['REQUEST_METHOD'] == 'GET' )
 		{
@@ -29,11 +34,11 @@
 		}
 
     // Fehler wenn ApplicationID
-    if ($applicationId != $applicationIdValidation)
+    if (( $applicationId != $applicationIdValidation) AND $TestMode == false )
 		fail('Fehlerhafte Application ID : ' . $applicationId);
 	
     // Fehler wenn UserID falsch
-    if ($userId != $userIdValidation)
+    if (( $userId != $userIdValidation ) AND $TestMode == false)
 		fail('Fehlerhafte User ID : ' . $userId);
 
     // Fehler wenn Anfrage aelter als 60 Sekunden
@@ -51,7 +56,8 @@
 		StartNewSession($parentDataID,$command);
 	
 	$spokenWords = explode(' ', $command);
-   
+	$endsession = false;
+	   
 	// Wenn Satz angefangen, frage was ich tun soll und warten auf Antwort
 	// Session nicht beenden
 	if ($requestType == 'LaunchRequest')
@@ -63,15 +69,15 @@
 	$RunningSession = intval(GetVariable('CommandID'));
 	
 	if ( $RunningSession == 0 )
+		$RunningSession = intval(SearchingKeyWords($command) );
+	
+	if ( $RunningSession > 0 ) 				
 		{
-		$RunningSession = SearchingKeyWords($command);
-		$ScriptName = $AlexaArray[$RunningSession-1][1];
+		$ScriptName = $AlexaMasterKeyArray[$RunningSession-1][1];								
+		$endsession = include($ScriptName);
 		}
-	else	
-		$ScriptName = $AlexaArray[$RunningSession-1][1];
-				
-	$endsession = include($ScriptName);
 						
+
 	if ( $endsession )
 		EndSession($parentDataID,$endsession);
 	else
