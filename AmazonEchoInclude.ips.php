@@ -4,24 +4,37 @@
 //******************************************************************************
 function SearchingKeyWords($command)
 	{
-	GLOBAL $AlexaArray;
+	GLOBAL $AlexaMasterKeyArray;
 	GLOBAL $debug;
+	GLOBAL $spokenWords;
+	
+	$spokenWords = explode(" ",$command);
 	
 	$result = false;
 	$count = 1;
 
-	foreach($AlexaArray as $c)
+	$debug = false;
+	
+	foreach($AlexaMasterKeyArray as $c)
 		{	
 		$result = false;
+		
 		if ( $c[0] == "" )
+			{
+			if ( $debug ) IPS_LogMessage(basename(__FILE__),"Keywort in Array leer");
 			continue;
-				
-		$eval = "\$result = (" .  $c[0] .");";	
+			}
+		else
+			{
+			$eval = "\$result = (" .  $c[0] .");";	
+			if ( $debug ) IPS_LogMessage(basename(__FILE__),"EVAL:".$eval);
+			eval ($eval);		
+			}
+		if ( $result == true )
+			{
+			if ( $debug ) IPS_LogMessage(basename(__FILE__),"OK - ".$c[0]);
+			}
 		
-		if ( $debug ) IPS_LogMessage(basename(__FILE__),"eval: [".$eval."]");
-
-		
-		eval ($eval);		
 		
 		if ( $result == true )
 			{
@@ -30,7 +43,8 @@ function SearchingKeyWords($command)
 			$result = true;
 			break;
 			
-			}	
+			}
+			
 		$count = $count + 1;
 		
 		}
@@ -229,10 +243,15 @@ function respond($Response, $endSession = false)
 	// Soll Session beendet werden ?
 	$shouldEndSession = $endSession ? 'true' : 'false';
 
+	// PlainText
 	$text = '{"version" : "1.0","response" : {"outputSpeech" : {"type" : "PlainText","text" : "'.$Response.'" },"shouldEndSession" : '.$shouldEndSession.'}}';
 
+	//SSML
+	$Response = '<speak>'.$Response.'</speak>'; 
+	$text = '{"version" : "1.0","response" : {"outputSpeech" : {"type" : "SSML","ssml" : "'.$Response.'" },"shouldEndSession" : '.$shouldEndSession.'}}';
+
 	header('Content-Length: ' . strlen($text));
-	
+		
 	echo ($text);
 
 }
