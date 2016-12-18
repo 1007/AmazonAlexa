@@ -1,4 +1,16 @@
 <?
+//******************************************************************************
+//
+//	SONOS - Ansteuerung   ( Stop , Play , Pause , Playlist )
+//  $SonosID muss angepasst werden
+//
+//	Beispiel:
+//		In Konfigurationsfile
+//					array("search('sonos')"	,"AmazonEcho_Sonos.ips.php"		),
+//
+//			sonos playliste test	- startet die Playliste test wenn vorhanden
+//
+//******************************************************************************
 
 	GLOBAL $debug;
 
@@ -23,6 +35,9 @@
 					
 	return $endsession;
 
+//******************************************************************************
+//
+//******************************************************************************
 function SonosStop()
 	{
 	GLOBAL $SonosID;
@@ -33,6 +48,9 @@ function SonosStop()
 	
 	}
 	
+//******************************************************************************
+//
+//******************************************************************************
 function SonosStart()
 	{
 	GLOBAL $SonosID;
@@ -43,6 +61,9 @@ function SonosStart()
 	
 	}
 	
+//******************************************************************************
+//
+//******************************************************************************
 function SonosPause()
 	{
 	GLOBAL $SonosID;
@@ -53,14 +74,13 @@ function SonosPause()
 	
 	}
 	
+//******************************************************************************
+//
+//******************************************************************************
 function SonosPlaylist($spokenwords)
 	{
 	GLOBAL $SonosID;
-	
-	//$list = "sonos liste Test1 test3 test";
-
-	//$spokenwords = explode(" " ,$list);
-	
+		
 	$key = array_search('sonos', $spokenwords);	
 	if ( $key !== false )
 		unset($spokenwords[$key]);
@@ -75,9 +95,7 @@ function SonosPlaylist($spokenwords)
 		unset($spokenwords[$key]);
 	
 	$list = implode(" ",$spokenwords);
-	
-	//echo "\n" . $list;
-	
+		
 	$playlists = IPS_GetVariableProfile('Playlist.SONOS');
 	
 	$gefunden = false;
