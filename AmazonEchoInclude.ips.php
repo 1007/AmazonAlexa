@@ -138,7 +138,8 @@ function StartNewSession($parentDataID,$command)
 	
 	foreach($childs as $child )
 		{
-		$var = IPS_GetVariable($child);
+		$var = @IPS_GetVariable($child);
+		
 		if ( $var['VariableType'] == 3 )
 			SetValue($child , "");
 		}
