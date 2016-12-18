@@ -9,7 +9,9 @@
 //					array("search('sonos')"	,"AmazonEcho_Sonos.ips.php"		),
 //
 //			sonos playliste test	- startet die Playliste test wenn vorhanden
-//
+//          sonos pause				
+//			sonos play
+//			sonos stop
 //******************************************************************************
 
 	GLOBAL $debug;
