@@ -1,9 +1,14 @@
 <?
+//******************************************************************************
+//
+//	Testscript
+//
+//******************************************************************************
+
+
 	IPSUtils_Include ("AmazonEchoInclude.ips.php");
 	IPSUtils_Include ("AmazonEchoConfig.ips.php");
 	
-   	$debug = true;
-
    	$command = "dimme licht im arbeitszimmer";
 
 	echo "\n" . $command;
