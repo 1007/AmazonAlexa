@@ -13,11 +13,22 @@
 //				Alexa  : "Drucker wird eingeschaltet"
 //
 //******************************************************************************
-
-	IPSUtils_Include ("Funcpool.ips.php");
-
+/*
+	Beispiel in der Konfiguration
 	
-	
+		$AlexaGeraetArray = array( 
+		//			       spoken           Geraet           Typ           ID
+		array(""		,"computer"		,"Computer"		, "VARIABLE"    ,19350),
+		array(""		,"drucker"		,"Drucker"		, "FS20"   		,30543),
+		array(""		,"heizlüfter"	,"Heizlüfter"	, "FS20"		,32995),
+		array(""		,"box"			,"Dreambox"		, "VARIABLE"    ,19015),
+			   	   	
+				);
+
+
+*/
+//******************************************************************************
+
 	if ( $debug ) IPS_LogMessage(basename(__FILE__),"Start");
 
 	$endsession = false;
@@ -25,78 +36,72 @@
 	$spokenWords = explode(' ', $command);
 
 	$result = FindeGeraet($spokenWords);
-	
 	if( $result == false )
-		
-	// Kein Geraet gefunden - nachfragen
-	if ( $result == false )
-		{  
-		$response = "Was soll ich für dich schalten ?";	
-		SetVariable("Response",$response);		
-		$endsession = false;		
-		}
-	
-	if ( GetVariable("Geraet") != "" )
-		{
+		return false;
 			
-		if ( in_array('ein', $spokenWords) OR in_array('einschalten', $spokenWords) )
-			SetVariable("Aktion","Ein");
-		if ( in_array('aus', $spokenWords) OR in_array('ausschalten', $spokenWords) )
-			SetVariable("Aktion","Aus");
-		
-		// Nachfragen ob einschalten oder ausschalten
-		if ( GetVariable("Aktion") == "" )
-			{
-			$response = "Soll ich " . GetVariable("Geraet") . " einschalten oder ausschalten ?";	
-			SetVariable("Response",$response);		
-			$endsession = false;		
-			}
-				
-		}
-	
+	$result = FindeAktion($spokenWords);
+	if( $result == false )
+		return false;
+			
 	// Geraet schalten
-	if ( GetVariable("Geraet") != "" AND  GetVariable("Aktion") != "" )
-		{
-		$response = DoAktion();
-		SetVariable("Response",$response);		
-		$endsession = true;
-		}
+	$result = DoAktion();
 					
-	return $endsession;
+	return true;
+
+//******************************************************************************
+//	Suche Geraet
+//******************************************************************************
+function FindeAktion($spokenWords)
+	{
+	GLOBAL $AlexaGeraetArray;
+
+	if ( in_array('ein', $spokenWords) OR in_array('einschalten', $spokenWords) )
+		SetVariable("Aktion","Ein");
+	if ( in_array('aus', $spokenWords) OR in_array('ausschalten', $spokenWords) )
+		SetVariable("Aktion","Aus");
+
+	// Nachfragen ob einschalten oder ausschalten
+	if ( GetVariable("Aktion") == "" )
+		{
+		$geraet = $AlexaGeraetArray[intval(GetVariable("Geraet"))][2];
+		$response = "Soll ich " . $geraet . " einschalten oder ausschalten ?";	
+		SetVariable("Response",$response);		
+		return false;		
+		}
+	else
+		return true;
 
 
+	}
+	
 //******************************************************************************
 //	Suche Geraet
 //******************************************************************************
 function FindeGeraet($spokenWords)
 	{
+	GLOBAL $AlexaGeraetArray;
 	
 	$result = false;
 	
-	if ( in_array('computer', $spokenWords) )
-		{
-		SetVariable("Geraet","Computer");
-		$result = true;
-		}
+	$count = 0;
 
-	if ( in_array('drucker', $spokenWords) OR in_array('drucke', $spokenWords) )
-		{
-		SetVariable("Geraet","Drucker");
-		$result = true;
-		}
+	if ( GetVariable("Geraet") != "" )		// bereits Geraet gefunden
+		return true;
 	
-	if ( in_array('dreambox', $spokenWords) OR in_array('box', $spokenWords) )
+	foreach($AlexaGeraetArray as $geraet )
 		{
-		SetVariable("Geraet","Dreambox");
-		$result = true;
+		if ( in_array($geraet[1], $spokenWords) )
+			{
+			SetVariable("Geraet",$count);		
+			$result = true;
+			break;
+			}
+			
+		$count = $count + 1;
 		}
-
-	if ( in_array('heizlüfter', $spokenWords) )
-		{
-		SetVariable("Geraet","Heizlüfter");
-		$result = true;
-		}
-
+		
+	if ( $result == false )
+		SetVariable("Response","Was soll ich für dich schalten ?");	
 
 	return $result;				
 							
@@ -108,77 +113,36 @@ function FindeGeraet($spokenWords)
 //******************************************************************************
 function DoAktion()
 	{
+	GLOBAL $AlexaGeraetArray;
+
 	IPSUtils_Include ('IPSComponent.class.php', 'IPSLibrary::app::core::IPSComponent');
 	IPSUtils_Include ('IPSComponentSwitch_FS20.class.php', 'IPSLibrary::app::core::IPSComponent::IPSComponentSwitch');
-	IPSUtils_Include ("DreamboxFunktionen.ips.php");
 	
-	$geraet = GetVariable("Geraet");
 	$aktion = GetVariable("Aktion");
+	if ( $aktion == "Ein" )
+	   $status = true;
+	if ( $aktion == "Aus" )
+	   $status = false;
+	   
+	$geraetearray = $AlexaGeraetArray[intval(GetVariable("Geraet"))]; 	
 	
-	$response = "Konnte Geraet nicht schalten";
+	$geraet = $geraetearray[2];
 	
-	if ( $geraet == 'Computer' )
+	if ( $geraetearray[3] == "VARIABLE" )
 		{
-		WakeOnLan();
-		$response = "Computer wird eingeschaltet";
+		SetValue($geraetearray[4], $status);		
+		SetVariable("Response",$geraet . " " . $aktion . " geschaltet");	
+		return true;
 		}
-
-	if ( $geraet == 'Drucker' )
-		{
-		$drucker  = IPSUtil_ObjectIDByPath("Hardware.FS20.Ausgaenge.Arbeit.Drucker");
-
-		$component =  new IPSComponentSwitch_FS20($drucker);
 		
-		if ( $aktion == "Ein"  )
-			{
-			$component->SetState(true);
-			$response = "Drucker wird eingeschaltet";
-			}
-
-		if ( $aktion == "Aus" )
-			{
-			$component->SetState(false);
-			$response = "Drucker wird ausgeschaltet";
-			}
-		}
-
-	if ( $geraet == 'Heizlüfter' )
+	if ( $geraetearray[3] == "FS20" )
 		{
-		$luefter  = IPSUtil_ObjectIDByPath("Hardware.FS20.Ausgaenge.Arbeit.Heizluefter");
-
-		$component =  new IPSComponentSwitch_FS20($luefter);
-		
-		if ( $aktion == "Ein"  )
-			{
-			$component->SetState(true);
-			$response = "Heizlüfter wird eingeschaltet";
-			}
-
-		if ( $aktion == "Aus" )
-			{
-			$component->SetState(false);
-			$response = "Heizlüfter wird ausgeschaltet";
-			}
+		$component =  new IPSComponentSwitch_FS20($geraetearray[4]);
+		$component->SetState($status);
+		SetVariable("Response",$geraet . " " . $aktion . " geschaltet");	
+		return true;		
 		}
 
-	if ( $geraet == 'Dreambox' )
-		{
-		
-		if ( $aktion == "Ein"  )
-			{
-			DreamboxWakeup();
-			$response = "Dreambox eingeschaltet";
-			}
-
-		if ( $aktion == "Aus" )
-			{
-			DreamboxStandby();
-			$response = "Dreambox ausgeschaltet";
-			}
-		}
-
-
-	return $response;
 	
 	}
 
