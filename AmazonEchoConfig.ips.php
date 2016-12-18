@@ -29,8 +29,9 @@
 //******************************************************************************
 	GLOBAL $AlexaGeraetArray;
 	$AlexaMasterKeyArray = array( 				
-	   array("search('licht') AND ( search('schalte') OR search('dimme') ) "			,"AmazonEcho_Licht.ips.php"		),
-	   array("search('temperatur') AND search('hoch') "													,"AmazonEcho_Temperatur.ips.php"),
+	   array("search('licht') AND ( search('schalte') OR search('dimme') ) "     ,"AmazonEcho_Licht.ips.php"		),
+	   array("search('temperatur') AND search('hoch') "													 ,"AmazonEcho_Temperatur.ips.php"),
+	   array("search('sonos')"																				           ,"AmazonEcho_Sonos.ips.php"		),
 				);
 
 
