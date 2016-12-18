@@ -244,7 +244,7 @@ function respond($Response, $endSession = false)
 	$shouldEndSession = $endSession ? 'true' : 'false';
 
 	// PlainText
-	$text = '{"version" : "1.0","response" : {"outputSpeech" : {"type" : "PlainText","text" : "'.$Response.'" },"shouldEndSession" : '.$shouldEndSession.'}}';
+	//$text = '{"version" : "1.0","response" : {"outputSpeech" : {"type" : "PlainText","text" : "'.$Response.'" },"shouldEndSession" : '.$shouldEndSession.'}}';
 
 	//SSML
 	$Response = '<speak>'.$Response.'</speak>'; 
